@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using TaskManagerAPI.TaskManagerAPI.Models;
+using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Validators;
 

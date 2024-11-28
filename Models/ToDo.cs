@@ -1,4 +1,4 @@
-﻿namespace TaskManagerAPI.TaskManagerAPI.Models;
+﻿namespace TaskManagerAPI.Models;
 
 public class ToDo
 {

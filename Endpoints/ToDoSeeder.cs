@@ -1,5 +1,5 @@
 ﻿using TaskManagerAPI.TaskManagerAPI.Data;
-using TaskManagerAPI.TaskManagerAPI.Models;
+using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Endpoints;
 
