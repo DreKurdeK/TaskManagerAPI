@@ -2,10 +2,16 @@
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Endpoints;
+using TaskManagerAPI.Middleware;
 using TaskManagerAPI.TaskManagerAPI.Data;
 using TaskManagerAPI.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Logger
+builder.Logging.ClearProviders()
+    .AddConsole()
+    .AddDebug();
 
 // DbContext
 builder.Services.AddDbContext<ToDoDbContext>(options =>
@@ -20,16 +26,19 @@ builder.Services.AddValidatorsFromAssemblyContaining<ToDoValidator>();
 
 var app = builder.Build();
 
-// Use endpoints for ToDo from different file
-app.MapToDoEndpoints();
+// Middleware
+app.UseErrorHandling();
 
 // Swagger and seeder for development only
 if (app.Environment.IsDevelopment())
 {
-    app.MapToDoSeederEndpoint();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.MapToDoSeederEndpoint();
 }
+
+// Use endpoints for ToDo from different file
+app.MapToDoEndpoints();
 
 // Default map
 app.MapGet("/", () => "Hello World!");
