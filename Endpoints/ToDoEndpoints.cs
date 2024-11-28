@@ -64,6 +64,9 @@ public static class ToDoEndpoints
             
             todo.Id = Guid.NewGuid();
 
+            // If IsDone is null then make it false
+            todo.IsDone ??= false;
+
             db.ToDos.Add(todo);
             await db.SaveChangesAsync();
 
