@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="TaskManagerAPI\Controllers\" />
+    <Folder Include="TaskManagerAPI\Data\Migrations\" />
+    <Folder Include="TaskManagerAPI\Services\" />
+    <Folder Include="TaskManagerAPI\Tests\TaskManagerAPI.Tests\" />
+    <Folder Include="TaskManagerAPI\Validators\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+  </ItemGroup>
+
+</Project>
