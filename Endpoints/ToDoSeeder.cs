@@ -18,21 +18,21 @@ public static class ToDoSeeder
 
             var todos = new List<ToDo>
             {
-                new ToDo { Id = Guid.NewGuid(), Title = "Buy groceries", Description = "Milk, Eggs, Bread, and Vegetables", Expiry = DateTime.Today.AddDays(1).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Complete C# project", Description = "Finish the REST API project for task manager", Expiry = DateTime.Today.AddDays(2).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Attend meeting", Description = "Discuss project progress with the team", Expiry = DateTime.Today.AddDays(3).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Doctor appointment", Description = "Annual health checkup", Expiry = DateTime.Today.AddDays(4).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Clean the house", Description = "Tidy up the living room and kitchen", Expiry = DateTime.Today.AddDays(5).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Study for exam", Description = "Review study materials for upcoming exam", Expiry = DateTime.Today.AddDays(6).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Pay bills", Description = "Pay utility and phone bills", Expiry = DateTime.Today.AddDays(7).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Plan vacation", Description = "Book flights and hotels for summer trip", Expiry = DateTime.Today.AddDays(8).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Update resume", Description = "Add latest work experience to my CV", Expiry = DateTime.Today.AddDays(9).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Watch a movie", Description = "Watch the new Marvel movie", Expiry = DateTime.Today.AddDays(10).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Read a book", Description = "Finish reading 'Clean Code'", Expiry = DateTime.Today.AddDays(11).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Prepare presentation", Description = "Prepare slides for the client presentation", Expiry = DateTime.Today.AddDays(12).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Clean car", Description = "Wash and vacuum the car", Expiry = DateTime.Today.AddDays(13).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Organize files", Description = "Organize digital files on the computer", Expiry = DateTime.Today.AddDays(14).ToUniversalTime() },
-                new ToDo { Id = Guid.NewGuid(), Title = "Reply to emails", Description = "Respond to work and personal emails", Expiry = DateTime.Today.AddDays(15).ToUniversalTime() },
+                new ToDo { Id = Guid.NewGuid(), Title = "Buy groceries", Description = "Milk, Eggs, Bread, and Vegetables", Expiry = DateTimeOffset.UtcNow.AddDays(1)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Complete C# project", Description = "Finish the REST API project for task manager", Expiry = DateTimeOffset.UtcNow.AddDays(2)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Attend meeting", Description = "Discuss project progress with the team", Expiry = DateTimeOffset.UtcNow.AddDays(3)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Doctor appointment", Description = "Annual health checkup", Expiry = DateTimeOffset.UtcNow.AddDays(4)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Clean the house", Description = "Tidy up the living room and kitchen", Expiry = DateTimeOffset.UtcNow.AddDays(5)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Study for exam", Description = "Review study materials for upcoming exam", Expiry = DateTimeOffset.UtcNow.AddDays(6)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Pay bills", Description = "Pay utility and phone bills", Expiry = DateTimeOffset.UtcNow.AddDays(7)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Plan vacation", Description = "Book flights and hotels for summer trip", Expiry = DateTimeOffset.UtcNow.AddDays(8)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Update resume", Description = "Add latest work experience to my CV", Expiry = DateTimeOffset.UtcNow.AddDays(9)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Watch a movie", Description = "Watch the new Marvel movie", Expiry = DateTimeOffset.UtcNow.AddDays(10)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Read a book", Description = "Finish reading 'Clean Code'", Expiry = DateTimeOffset.UtcNow.AddDays(11)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Prepare presentation", Description = "Prepare slides for the client presentation", Expiry = DateTimeOffset.UtcNow.AddDays(12)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Clean car", Description = "Wash and vacuum the car", Expiry = DateTimeOffset.UtcNow.AddDays(13)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Organize files", Description = "Organize digital files on the computer", Expiry = DateTimeOffset.UtcNow.AddDays(14)},
+                new ToDo { Id = Guid.NewGuid(), Title = "Reply to emails", Description = "Respond to work and personal emails", Expiry = DateTimeOffset.UtcNow.AddDays(15)},
             };
 
             db.ToDos.AddRange(todos);
