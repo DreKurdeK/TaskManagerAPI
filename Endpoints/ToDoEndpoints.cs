@@ -68,14 +68,24 @@ public static class ToDoEndpoints
         {
             var todo = await GetTodoByIdAsync(db, id);
             if (todo is null) return Results.NotFound();
-            
-            // Skiping Guid because update doens't need a new one
-            todo.Title = updatedTodo.Title;
-            todo.Description = updatedTodo.Description;
-            todo.Expiry = updatedTodo.Expiry;
-            todo.PercentComplete = updatedTodo.PercentComplete;
-            todo.IsDone = updatedTodo.IsDone;
-            
+
+            // Skiping guid - Updated doens't need it
+            // Only update provided fields
+            if (!string.IsNullOrEmpty(updatedTodo.Title))
+                todo.Title = updatedTodo.Title;
+
+            if (!string.IsNullOrEmpty(updatedTodo.Description))
+                todo.Description = updatedTodo.Description;
+
+            if (updatedTodo.Expiry != default)
+                todo.Expiry = updatedTodo.Expiry;
+
+            if (updatedTodo.PercentComplete >= 0 && updatedTodo.PercentComplete <= 100)
+                todo.PercentComplete = updatedTodo.PercentComplete;
+
+            if (updatedTodo.IsDone != null)
+                todo.IsDone = updatedTodo.IsDone;
+
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
