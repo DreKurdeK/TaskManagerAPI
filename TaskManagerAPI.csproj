@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="TaskManagerAPI\Controllers\" />
     <Folder Include="TaskManagerAPI\Data\Migrations\" />
     <Folder Include="TaskManagerAPI\Services\" />
     <Folder Include="TaskManagerAPI\Tests\TaskManagerAPI.Tests\" />
