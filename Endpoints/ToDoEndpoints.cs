@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.TaskManagerAPI.Data;
 using TaskManagerAPI.TaskManagerAPI.Models;
 
@@ -34,27 +35,33 @@ public static class ToDoEndpoints
         
         // Get Todo's for today
         app.MapGet("/todos/upcoming/today", async (ToDoDbContext db) =>
-            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.Now.Date).ToListAsync());
+            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.UtcNow.Date).ToListAsync());
         
         // Get Todo's for tomorrow
         app.MapGet("/todos/upcoming/tomorrow", async (ToDoDbContext db) =>
-            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.Now.AddDays(1).Date).ToListAsync());
+            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.UtcNow.AddDays(1).Date).ToListAsync());
         
         // Get Todo's for current week
         app.MapGet("/todos/upcoming/week", async (ToDoDbContext db) =>
             await db.ToDos.Where(
-                t => t.Expiry.Date >= DateTimeOffset.Now.Date && t.Expiry.Date <= DateTimeOffset.Now.AddDays(7).Date).ToListAsync());
+                t => t.Expiry.Date >= DateTimeOffset.UtcNow.Date && t.Expiry.Date <= DateTimeOffset.UtcNow.AddDays(7).Date).ToListAsync());
         
         // Get Todo's for specifif number of days
         app.MapGet("/todos/upcoming/{days:int}", async (ToDoDbContext db, int days) =>
         {
-            var dateRange = DateTimeOffset.Now.AddDays(days).Date;
+            var dateRange = DateTimeOffset.UtcNow.AddDays(days).Date;
             return await db.ToDos.Where(t => t.Expiry.Date <= dateRange).ToListAsync();
         });
         
         // Creating Todo
-        app.MapPost("/todos", async (ToDoDbContext db, ToDo todo) =>
+        app.MapPost("/todos", async (ToDoDbContext db, ToDo todo, IValidator<ToDo> validator) =>
         {
+            var validationResult = await validator.ValidateAsync(todo);
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(validationResult.Errors);
+            }
+            
             todo.Id = Guid.NewGuid();
 
             db.ToDos.Add(todo);
