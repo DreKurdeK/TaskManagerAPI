@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TaskManagerAPI.TaskManagerAPI.Data;
+using TaskManagerAPI.Data;
 
 #nullable disable
 
-namespace TaskManagerAPI.TaskManagerAPI.Data.Migrations
+namespace TaskManagerAPI.Data.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
     [Migration("20241128155057_InitialCreate")]

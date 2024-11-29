@@ -1,4 +1,4 @@
-﻿using TaskManagerAPI.TaskManagerAPI.Data;
+﻿using TaskManagerAPI.Data;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Endpoints;

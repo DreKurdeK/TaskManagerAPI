@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Models;
 
-namespace TaskManagerAPI.TaskManagerAPI.Data;
+namespace TaskManagerAPI.Data;
 
 public class ToDoDbContext(DbContextOptions<ToDoDbContext> options) : DbContext(options)
 {

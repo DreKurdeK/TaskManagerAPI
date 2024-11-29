@@ -1,9 +1,8 @@
 ﻿using FluentValidation;
-using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerAPI.Endpoints;
 using TaskManagerAPI.Middleware;
-using TaskManagerAPI.TaskManagerAPI.Data;
+using TaskManagerAPI.Data;
 using TaskManagerAPI.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
