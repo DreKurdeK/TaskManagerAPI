@@ -69,7 +69,7 @@ public static class ToDoEndpoints
         });
 
 
-        // Map Creating Todo
+        // Map Creating Todo -
         app.MapPost("/todos", async (ToDo todo, IValidator<ToDo> validator, ToDoService toDoService) =>
         {
             var validationResult = await validator.ValidateAsync(todo);
@@ -82,7 +82,7 @@ public static class ToDoEndpoints
             return Results.Created($"/todos/{todo.Id}", todo);
         });
 
-        // Map Update Todo
+        // Map Update Todo -
         app.MapPut("/todos/{id:guid}", async (Guid id, ToDo updatedTodo, ToDoService toDoService) =>
         {
             await toDoService.UpdateToDoAsync(id, updatedTodo);
