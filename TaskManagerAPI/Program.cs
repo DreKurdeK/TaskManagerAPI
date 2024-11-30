@@ -1,20 +1,16 @@
-﻿// Program.cs
-
-using FluentValidation;
-using Microsoft.AspNetCore.Builder;
+﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TaskManagerAPI.Data;
 using TaskManagerAPI.Endpoints;
 using TaskManagerAPI.Middleware;
+using TaskManagerAPI.Services;
 using TaskManagerAPI.Validators;
+
+namespace TaskManagerAPI;
 
 public class Program
 {
-    public static WebApplication CreateApp(string[] args)
+    private static WebApplication CreateApp(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +22,9 @@ public class Program
         // DbContext
         builder.Services.AddDbContext<ToDoDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        
+        // Register services
+        builder.Services.AddScoped<ToDoService>();
 
         // Swagger
         builder.Services.AddEndpointsApiExplorer();

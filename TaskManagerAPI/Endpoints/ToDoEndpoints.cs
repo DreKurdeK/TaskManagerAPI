@@ -1,177 +1,106 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentValidation;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
-using TaskManagerAPI.Data;
+﻿// TaskManagerAPI/Endpoints/ToDoEndpoints.cs
 using TaskManagerAPI.Models;
+using TaskManagerAPI.Services;
+using FluentValidation;
 
 namespace TaskManagerAPI.Endpoints;
 
 public static class ToDoEndpoints
 {
     public static void MapToDoEndpoints(this IEndpointRouteBuilder app)
-    {  
-        // Get All Todo's
-        app.MapGet("/todos", async (ToDoDbContext db) =>
-            await db.ToDos.ToListAsync());
-        
-        // Get Todo by id 
-        app.MapGet("/todos/{id}", async (ToDoDbContext db, Guid id) =>
+    {
+        // Map Get all ToDo's
+        app.MapGet("/todos", async (ToDoService toDoService) =>
+            await toDoService.GetAllToDosAsync());
+
+        // Map Get Todo by id
+        app.MapGet("/todos/{id:guid}", async (Guid id, ToDoService toDoService) =>
         {
-            var todo = await GetTodoByIdAsync(db, id);
+            var todo = await toDoService.GetToDoByIdAsync(id);
             return todo is not null ? Results.Ok(todo) : Results.NotFound();
         });
-                
-        // Search Todo's by Title 
-        app.MapGet("/todos/search/{title}", async (ToDoDbContext db, string title) =>
+
+        // Map Search Todo's by Title
+        app.MapGet("/todos/search/{title}", async (string title, ToDoService toDoService) =>
         {
-            var todos = await db.ToDos
-                .Where(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
-                .ToListAsync();
-            
+            var todos = await toDoService.GetToDosByTitleAsync(title);
             if (todos.Count == 0)
-                return Results.NotFound(new {message = "No Todos found with this title."});
+                return Results.NotFound(new { message = "No Todos found with this title." });
 
             return Results.Ok(todos);
         });
-        
-        // Get Todo's for today
-        app.MapGet("/todos/upcoming/today", async (ToDoDbContext db) =>
-            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.UtcNow.Date).ToListAsync());
-        
-        // Get Todo's for tomorrow
-        app.MapGet("/todos/upcoming/tomorrow", async (ToDoDbContext db) =>
-            await db.ToDos.Where(t => t.Expiry.Date == DateTimeOffset.UtcNow.AddDays(1).Date).ToListAsync());
-        
-        // Get Todo's for current week
-        app.MapGet("/todos/upcoming/week", async (ToDoDbContext db) =>
-            await db.ToDos.Where(
-                t => t.Expiry.Date >= DateTimeOffset.UtcNow.Date && t.Expiry.Date <= DateTimeOffset.UtcNow.AddDays(7).Date).ToListAsync());
-        
-        // Get Todo's for specifif number of days
-        app.MapGet("/todos/upcoming/{days:int}", async (ToDoDbContext db, int days) =>
+
+        // Map Get for todos within a specific number of days
+        app.MapGet("/todos/upcoming/{days:int}", async (int days, ToDoService toDoService) =>
         {
             var dateRange = DateTimeOffset.UtcNow.AddDays(days).Date;
-            return await db.ToDos.Where(t => t.Expiry.Date <= dateRange).ToListAsync();
+            var todos = await toDoService.GetToDosForDateRangeAsync(dateRange, DateTimeOffset.UtcNow);
+            return Results.Ok(todos);
         });
-        
-        // Creating Todo
-        app.MapPost("/todos", async (ToDoDbContext db, ToDo todo, IValidator<ToDo> validator) =>
+
+        // Map Get for todos for today
+        app.MapGet("/todos/today", async (ToDoService toDoService) =>
+        {
+            var today = DateTimeOffset.UtcNow.Date;
+            var todos = await toDoService.GetToDosForDateRangeAsync(today, today.AddDays(1).AddTicks(-1));
+            return Results.Ok(todos);
+        });
+
+        // Map Get for todos for tommorow
+        app.MapGet("/todos/next-day", async (ToDoService toDoService) =>
+        {
+            var tomorrow = DateTimeOffset.UtcNow.AddDays(1).Date;
+            var todos = await toDoService.GetToDosForDateRangeAsync(tomorrow, tomorrow.AddDays(1).AddTicks(-1));
+            return Results.Ok(todos);
+        });
+
+        // Map Get for todos for this week
+        app.MapGet("/todos/current-week", async (ToDoService toDoService) =>
+        {
+            var currentDate = DateTimeOffset.UtcNow;
+    
+            // Calculate start of the week and end of the week
+            var startOfWeek = currentDate.AddDays(-(int)currentDate.DayOfWeek + (int)DayOfWeek.Monday).Date;
+            var endOfWeek = startOfWeek.AddDays(6);
+
+            // Return todos for the current week
+            var todos = await toDoService.GetToDosForDateRangeAsync(startOfWeek, endOfWeek);
+            return Results.Ok(todos);
+        });
+
+
+        // Map Creating Todo
+        app.MapPost("/todos", async (ToDo todo, IValidator<ToDo> validator, ToDoService toDoService) =>
         {
             var validationResult = await validator.ValidateAsync(todo);
             if (!validationResult.IsValid)
             {
                 return Results.BadRequest(validationResult.Errors);
             }
-            
-            todo.Id = Guid.NewGuid();
 
-            // If IsDone is null then make it false
-            todo.IsDone ??= false;
-
-            db.ToDos.Add(todo);
-            await db.SaveChangesAsync();
-
+            await toDoService.CreateToDoAsync(todo);
             return Results.Created($"/todos/{todo.Id}", todo);
         });
 
-        // Update Todo
-        app.MapPut("/todos/{id}", async (ToDoDbContext db, Guid id, ToDo updatedTodo) =>
+        // Map Update Todo
+        app.MapPut("/todos/{id:guid}", async (Guid id, ToDo updatedTodo, ToDoService toDoService) =>
         {
-            var todo = await GetTodoByIdAsync(db, id);
-            if (todo is null) return Results.NotFound();
-
-            // Skiping guid - Updated doens't need it
-            // Only update provided fields
-            if (!string.IsNullOrEmpty(updatedTodo.Title))
-                todo.Title = updatedTodo.Title;
-
-            if (!string.IsNullOrEmpty(updatedTodo.Description))
-                todo.Description = updatedTodo.Description;
-
-            if (updatedTodo.Expiry != default)
-                todo.Expiry = updatedTodo.Expiry;
-
-            if (updatedTodo.PercentComplete >= 0 && updatedTodo.PercentComplete <= 100)
-                todo.PercentComplete = updatedTodo.PercentComplete;
-
-            if (updatedTodo.IsDone != null)
-                todo.IsDone = updatedTodo.IsDone;
-
-            await db.SaveChangesAsync();
+            await toDoService.UpdateToDoAsync(id, updatedTodo);
             return Results.NoContent();
         });
-        
-        // Set Todo complition percentage by id
-        app.MapPatch("/todos/{id:guid}/percent", async (ToDoDbContext db, Guid id, int percent) =>
-        {
-            var todo = await GetTodoByIdAsync(db, id);
-            if (todo is null) return Results.NotFound();
 
-            todo.PercentComplete = percent;
-            await db.SaveChangesAsync();
+        // Map Mark Todo as done by Id
+        app.MapPatch("/todos/{id:guid}/done", async (Guid id, ToDoService toDoService) =>
+        {
+            await toDoService.MarkToDoAsDoneAsync(id);
             return Results.NoContent();
         });
-        
-        // Set Todo complition percentage by Title
-        app.MapPatch("/todos/{title}/percent", async (ToDoDbContext db, string title, int percent) =>
-        {
-            var todo = await GetTodoByTitleAsync(db, title);
-            if (todo is null) return Results.NotFound();
 
-            todo.PercentComplete = percent;
-            await db.SaveChangesAsync();
+        // Map Delete Todo by Id
+        app.MapDelete("/todos/{id:guid}", async (Guid id, ToDoService toDoService) =>
+        {
+            await toDoService.DeleteToDoAsync(id);
             return Results.NoContent();
         });
-        
-        // Mark Todo as done by Id
-        app.MapPatch("/todos/{id:guid}/done", async (ToDoDbContext db, Guid id) =>
-        {
-            var todo = await GetTodoByIdAsync(db, id);
-            if (todo is null) return Results.NotFound();
-
-            todo.IsDone = true;
-            todo.PercentComplete = 100;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        });
-        
-        // Mark Todo as done by Title
-        app.MapPatch("/todos/{title}/done", async (ToDoDbContext db, string title, int percent) =>
-        {
-            var todo = await GetTodoByTitleAsync(db, title);
-            if (todo is null) return Results.NotFound();
-
-            todo.IsDone = true;
-            todo.PercentComplete = 100;
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        });
-        
-        // Delete Todo by Id
-        app.MapDelete("/todos/{id}", async (ToDoDbContext db, Guid id) =>
-        {
-            var todo = await GetTodoByIdAsync(db, id);
-            if (todo == null) return Results.NotFound();
-
-            db.ToDos.Remove(todo);
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        });
-        
-        static async Task<ToDo?> GetTodoByIdAsync(ToDoDbContext db, Guid id)
-        {
-            return await db.ToDos.FindAsync(id);
-        }
-
-        static async Task<ToDo?> GetTodoByTitleAsync(ToDoDbContext db, string title)
-        {
-            return await db.ToDos
-                .FirstOrDefaultAsync(t => t.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
-        }
     }
 }
