@@ -22,7 +22,7 @@ public class ToDoService(ToDoDbContext dbContext)
     {
         // search todos by Title using the title keyword
         return await dbContext.ToDos
-            .Where(t => t.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+            .Where(t => EF.Functions.Like(t.Title, $"%{title}%"))
             .ToListAsync();
     }
 
