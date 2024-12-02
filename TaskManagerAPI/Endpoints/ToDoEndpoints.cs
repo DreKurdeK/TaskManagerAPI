@@ -32,8 +32,8 @@ public static class ToDoEndpoints
         // Map Get for todos within a specific number of days
         app.MapGet("/todos/upcoming/{days:int}", async (int days, ToDoService toDoService) =>
         {
-            var dateRange = DateTimeOffset.UtcNow.AddDays(days).Date;
-            var todos = await toDoService.GetToDosForDateRangeAsync(dateRange, DateTimeOffset.UtcNow);
+            var endDate = DateTimeOffset.UtcNow.AddDays(days).Date;
+            var todos = await toDoService.GetToDosForDateRangeAsync(DateTimeOffset.UtcNow, endDate);
             return Results.Ok(todos);
         });
 
