@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 using TaskManagerAPI.Models;
 
@@ -17,7 +18,7 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         
         // assert
         response.EnsureSuccessStatusCode();
-        var todos = await response.Content.ReadFromJsonAsync<IEnumerable<ToDo>>();
+        var todos = await response.Content.ReadFromJsonAsync<List<ToDo>>();
         Assert.NotNull(todos);
         Assert.Empty(todos);
     }
@@ -27,22 +28,56 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
     {   
         // arrange
         var client = factory.CreateClient();
-        await CreateTodo(client, "Test 1", "Test 1 desc");
-        await CreateTodo(client, "Test 2", "Test 2 desc");
+        await CreateTodo(client, "ThereAreSomeTodosTest 1", "Test 1 desc");
+        await CreateTodo(client, "ThereAreSomeTodosTest 2", "Test 2 desc");
         
         // act
         var response = await client.GetAsync("/todos");
         
         // assert
         response.EnsureSuccessStatusCode();
-        var todos = (await response.Content.ReadFromJsonAsync<IEnumerable<ToDo>>())?.ToArray();
+        var todos = (await response.Content.ReadFromJsonAsync<List<ToDo>>())?.ToArray();
         Assert.NotNull(todos);
-        Assert.Equal(2, todos.Length);
-        Assert.Contains(todos, t => t.Title == "Test 1");
-        Assert.Contains(todos, t => t.Title == "Test 2");
+        Assert.Contains(todos, t => t.Title == "ThereAreSomeTodosTest 1");
+        Assert.Contains(todos, t => t.Title == "ThereAreSomeTodosTest 2");
+    }    
+    
+    [Fact]
+    public async Task GetToDoById_NonExistingId_ReturnsNotFound()
+    {   
+        // arrange
+        var client = factory.CreateClient();
+        var nonExistingId = Guid.NewGuid();
+        
+        // act
+        var response = await client.GetAsync($"/todos/{nonExistingId}");
+        
+        // assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
-    private static async Task CreateTodo(HttpClient client, string title, string description)
+    [Fact]
+    public async Task GetToDoById_ExistingId_ReturnsToDo()
+    {
+        // arrange
+        var client = factory.CreateClient();
+        const string title = "Test";
+        const string description = "Test desc";
+        var id = await CreateTodo(client, title, description);
+        
+        // act 
+        var getResponse = await client.GetAsync($"/todos/{id}");
+        getResponse.EnsureSuccessStatusCode();
+        var fetchedToDo = await getResponse.Content.ReadFromJsonAsync<ToDo>();
+        
+        // assert
+        Assert.NotNull(fetchedToDo);
+        Assert.Equal(title, fetchedToDo!.Title);
+        Assert.Equal(description, fetchedToDo!.Description);
+        Assert.Equal(id, fetchedToDo.Id);
+    }
+
+    private static async Task<Guid> CreateTodo(HttpClient client, string title, string description)
     {
         var toDo = new ToDo
         {
@@ -52,7 +87,11 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         };
         var creatingResponse = await client.PostAsJsonAsync("/todos", toDo);
         creatingResponse.EnsureSuccessStatusCode();
+
+        var createdToDo = await creatingResponse.Content.ReadFromJsonAsync<ToDo>();
+        return createdToDo!.Id;
     }
+
 
 
 }
