@@ -3,35 +3,64 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TaskManagerAPI.Data;
+using Testcontainers.PostgreSql;
+using Npgsql;
 
-namespace TaskManagerAPI.Tests;
-
-public sealed class AppFactory : WebApplicationFactory<Program>
+namespace TaskManagerAPI.Tests
 {
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public sealed class AppFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {
-        builder.ConfigureServices(services =>
+        private readonly PostgreSqlContainer _databaseContainer = new PostgreSqlBuilder()
+            .WithUsername("postgres")
+            .WithPassword("postgres")
+            .WithDatabase("todoapp")
+            .Build();
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            RemoveExistingDbContext(services);
-            services.AddDbContext<ToDoDbContext>(options =>
-                options.UseInMemoryDatabase("todoapp"));
-        });
-    }
+            builder.ConfigureServices(services =>
+            {
+                RemoveDbContextConfiguration(services);
 
-    private static void RemoveExistingDbContext(IServiceCollection services)
-    {
-        var descriptor = services.SingleOrDefault(serviceDescriptor =>
-            serviceDescriptor.ServiceType == typeof(DbContextOptions<ToDoDbContext>));
-        
-        if (descriptor != null)
-            services.Remove(descriptor);
+                services.AddDbContext<ToDoDbContext>(options =>
+                {
+                    options.UseNpgsql(_databaseContainer.GetConnectionString());
+                });
+            });
+        }
 
-        var providerDescriptors = services
-            .Where(serviceDescriptor => serviceDescriptor
-                .ServiceType.FullName?.Contains("EntityFrameworkCore") == true)
-            .ToList();
-        
-        foreach (var providerDescriptor in providerDescriptors)
-            services.Remove(providerDescriptor);
+        private static void RemoveDbContextConfiguration(IServiceCollection services)
+        {
+            var dbContextDescriptor = services
+                .SingleOrDefault(descriptor => descriptor.ServiceType == typeof(DbContextOptions<ToDoDbContext>));
+            
+            if (dbContextDescriptor != null)
+                services.Remove(dbContextDescriptor);
+
+            var efCoreDescriptors = services
+                .Where(descriptor => descriptor.ServiceType.FullName?.Contains("EntityFrameworkCore") == true)
+                .ToList();
+            
+            foreach (var descriptor in efCoreDescriptors)
+                services.Remove(descriptor);
+        }
+
+        public async Task InitializeAsync()
+        {
+            await _databaseContainer.StartAsync();
+
+            var connectionString = _databaseContainer.GetConnectionString();
+            await using var connection = new NpgsqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            using var scope = Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ToDoDbContext>();
+            await dbContext.Database.MigrateAsync();
+        }
+
+        public new async Task DisposeAsync()
+        {
+            await _databaseContainer.StopAsync();
+        }
     }
 }
