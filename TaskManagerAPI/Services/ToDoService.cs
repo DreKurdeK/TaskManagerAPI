@@ -8,77 +8,70 @@ public class ToDoService(ToDoDbContext dbContext)
 {
     public async Task<List<ToDo>> GetAllToDosAsync()
     {
-        // get all the todo items from db
         return await dbContext.ToDos.ToListAsync();
     }
 
-    public async Task<ToDo?> GetToDoByIdAsync(Guid id)
+    public async Task<ToDo?> GetToDoByIdAsync(Guid todoId)
     {
-        // This function fetch a todo by its unique ID
-        return await dbContext.ToDos.FindAsync(id);
+        return await dbContext.ToDos.FindAsync(todoId);
     }
 
-    public async Task<List<ToDo>> GetToDosByTitleAsync(string title)
+    public async Task<List<ToDo>> GetToDosByTitleAsync(string searchTitle)
     {
-        // search todos by Title using the title keyword
         return await dbContext.ToDos
-            .Where(t => EF.Functions.Like(t.Title, $"%{title}%"))
+            .Where(todo => EF.Functions.Like(todo.Title, $"%{searchTitle}%"))
             .ToListAsync();
     }
 
     public async Task<List<ToDo>> GetToDosForDateRangeAsync(DateTimeOffset startDate, DateTimeOffset endDate)
     {
-        // Return all todos within the date range
         return await dbContext.ToDos
-            .Where(t => t.Expiry.Date >= startDate.Date && t.Expiry.Date <= endDate.Date)
+            .Where(todo => todo.Expiry.Date >= startDate.Date && todo.Expiry.Date <= endDate.Date)
             .ToListAsync();
     }
-    
 
-    public async Task CreateToDoAsync(ToDo todo)
+    public async Task CreateToDoAsync(ToDo newToDo)
     {
-        // Add todo to db if it does not exists already
-        todo.Id = Guid.NewGuid();
-        todo.IsDone ??= false;
-        todo.PercentComplete ??= 0;
+        newToDo.Id = Guid.NewGuid();
+        newToDo.IsDone ??= false;
+        newToDo.PercentComplete ??= 0;
 
-        dbContext.ToDos.Add(todo);
+        dbContext.ToDos.Add(newToDo);
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateToDoAsync(Guid id, ToDo updatedTodo)
+    public async Task UpdateToDoAsync(Guid todoId, ToDo updatedToDo)
     {
-        var todo = await GetToDoByIdAsync(id);
-        if (todo is not null)
+        var existingToDo = await GetToDoByIdAsync(todoId);
+        if (existingToDo is not null)
         {
-            // Update only the properties that are set in updatedTodo
-            if (!string.IsNullOrEmpty(updatedTodo.Title)) todo.Title = updatedTodo.Title;
-            if (!string.IsNullOrEmpty(updatedTodo.Description)) todo.Description = updatedTodo.Description;
-            if (updatedTodo.Expiry != default) todo.Expiry = updatedTodo.Expiry;
-            if (updatedTodo.PercentComplete is >= 0 and <= 100) todo.PercentComplete = updatedTodo.PercentComplete;
-            if (updatedTodo.IsDone != null) todo.IsDone = updatedTodo.IsDone;
+            if (!string.IsNullOrEmpty(updatedToDo.Title)) existingToDo.Title = updatedToDo.Title;
+            if (!string.IsNullOrEmpty(updatedToDo.Description)) existingToDo.Description = updatedToDo.Description;
+            if (updatedToDo.Expiry != default) existingToDo.Expiry = updatedToDo.Expiry;
+            if (updatedToDo.PercentComplete is >= 0 and <= 100) existingToDo.PercentComplete = updatedToDo.PercentComplete;
+            if (updatedToDo.IsDone != null) existingToDo.IsDone = updatedToDo.IsDone;
 
             await dbContext.SaveChangesAsync();
         }
     }
 
-    public async Task MarkToDoAsDoneAsync(Guid id)
+    public async Task MarkToDoAsDoneAsync(Guid todoId)
     {
-        var todo = await GetToDoByIdAsync(id);
-        if (todo is not null)
+        var existingToDo = await GetToDoByIdAsync(todoId);
+        if (existingToDo is not null)
         {
-            todo.IsDone = true;
-            todo.PercentComplete = 100;
+            existingToDo.IsDone = true;
+            existingToDo.PercentComplete = 100;
             await dbContext.SaveChangesAsync();
         }
     }
 
-    public async Task DeleteToDoAsync(Guid id)
+    public async Task DeleteToDoAsync(Guid todoId)
     {
-        var todo = await GetToDoByIdAsync(id);
-        if (todo is not null)
+        var existingToDo = await GetToDoByIdAsync(todoId);
+        if (existingToDo is not null)
         {
-            dbContext.ToDos.Remove(todo);
+            dbContext.ToDos.Remove(existingToDo);
             await dbContext.SaveChangesAsync();
         }
     }
