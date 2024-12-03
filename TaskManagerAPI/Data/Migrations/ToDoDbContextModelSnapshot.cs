@@ -22,7 +22,7 @@ namespace TaskManagerAPI.TaskManagerAPI.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TaskManagerAPI.TaskManagerAPI.Models.ToDo", b =>
+            modelBuilder.Entity("TaskManagerAPI.Models.ToDo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,20 +30,22 @@ namespace TaskManagerAPI.TaskManagerAPI.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
-                    b.Property<DateTime>("Expiry")
+                    b.Property<DateTimeOffset>("Expiry")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<bool>("IsDone")
+                    b.Property<bool?>("IsDone")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("PercentComplete")
+                    b.Property<int?>("PercentComplete")
                         .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
