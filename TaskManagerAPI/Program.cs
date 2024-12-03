@@ -43,7 +43,7 @@ public class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-            app.MapToDoSeederEndpoint();
+            app.MapToDoSeederEndpoints();
         }
 
         // Use endpoints for ToDo from different file
