@@ -51,11 +51,11 @@ public class ToDoService(ToDoDbContext dbContext)
         var todo = await GetToDoByIdAsync(id);
         if (todo is not null)
         {
-            // Update only the properties that are set
+            // Update only the properties that are set in updatedTodo
             if (!string.IsNullOrEmpty(updatedTodo.Title)) todo.Title = updatedTodo.Title;
             if (!string.IsNullOrEmpty(updatedTodo.Description)) todo.Description = updatedTodo.Description;
             if (updatedTodo.Expiry != default) todo.Expiry = updatedTodo.Expiry;
-            if (updatedTodo.PercentComplete >= 0 && updatedTodo.PercentComplete <= 100) todo.PercentComplete = updatedTodo.PercentComplete;
+            if (updatedTodo.PercentComplete is >= 0 and <= 100) todo.PercentComplete = updatedTodo.PercentComplete;
             if (updatedTodo.IsDone != null) todo.IsDone = updatedTodo.IsDone;
 
             await dbContext.SaveChangesAsync();

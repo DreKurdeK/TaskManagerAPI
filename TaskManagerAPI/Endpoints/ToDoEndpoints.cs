@@ -15,6 +15,7 @@ public static class ToDoEndpoints
         // Map Get Todo by id
         app.MapGet("/todos/{id:guid}", async (Guid id, ToDoService toDoService) =>
         {
+            if (id == Guid.Empty) return Results.BadRequest();
             var todo = await toDoService.GetToDoByIdAsync(id);
             return todo is not null ? Results.Ok(todo) : Results.NotFound();
         });
@@ -32,6 +33,7 @@ public static class ToDoEndpoints
         // Map Get for todos within a specific number of days
         app.MapGet("/todos/upcoming/{days:int}", async (int days, ToDoService toDoService) =>
         {
+            if (days < 1) return Results.BadRequest();
             var endDate = DateTimeOffset.UtcNow.AddDays(days).Date;
             var todos = await toDoService.GetToDosForDateRangeAsync(DateTimeOffset.UtcNow, endDate);
             return Results.Ok(todos);
@@ -84,6 +86,11 @@ public static class ToDoEndpoints
         // Map Update Todo -
         app.MapPut("/todos/{id:guid}", async (Guid id, ToDo updatedTodo, ToDoService toDoService) =>
         {
+            var existingToDo = await toDoService.GetToDoByIdAsync(id);
+            if (existingToDo == null)
+            {
+                return Results.NotFound(new { message = "ToDo with given ID not found"});
+            }
             await toDoService.UpdateToDoAsync(id, updatedTodo);
             return Results.NoContent();
         });
@@ -91,6 +98,11 @@ public static class ToDoEndpoints
         // Map Mark Todo as done by Id
         app.MapPatch("/todos/{id:guid}/done", async (Guid id, ToDoService toDoService) =>
         {
+            var existingToDo = await toDoService.GetToDoByIdAsync(id);
+            if (existingToDo == null)
+            {
+                return Results.NotFound(new { message = "ToDo with given ID not found"});
+            }
             await toDoService.MarkToDoAsDoneAsync(id);
             return Results.NoContent();
         });
@@ -98,6 +110,11 @@ public static class ToDoEndpoints
         // Map Delete Todo by Id
         app.MapDelete("/todos/{id:guid}", async (Guid id, ToDoService toDoService) =>
         {
+            var existingToDo = await toDoService.GetToDoByIdAsync(id);
+            if (existingToDo == null)
+            {
+                return Results.NotFound(new { message = "ToDo with given ID not found"});
+            }
             await toDoService.DeleteToDoAsync(id);
             return Results.NoContent();
         });
