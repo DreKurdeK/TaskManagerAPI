@@ -1,5 +1,4 @@
-﻿using System;
-using FluentValidation;
+﻿using FluentValidation;
 using TaskManagerAPI.Models;
 
 namespace TaskManagerAPI.Validators;
@@ -17,9 +16,11 @@ public class ToDoValidator : AbstractValidator<ToDo>
             .MaximumLength(500).WithMessage("Description maximum length is 500.");
 
         RuleFor(x => x.Expiry)
-            .GreaterThan(DateTimeOffset.Now).WithMessage("Expiry Date must be in the future.");
+            .GreaterThanOrEqualTo(DateTimeOffset.UtcNow.AddDays(-7))
+            .WithMessage("Expiry Date must be in the future.");
 
         RuleFor(x => x.PercentComplete)
-            .InclusiveBetween(0, 100).WithMessage("Percent Complete need to be between 0 and 100.");
+            .InclusiveBetween(0, 100)
+            .WithMessage("Percent Complete need to be between 0 and 100.");
     }
 }
