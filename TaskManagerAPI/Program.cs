@@ -39,7 +39,7 @@ public class Program
         app.UseErrorHandling();
 
         // Swagger and seeder for development only
-        if (app.Environment.IsDevelopment())
+        //if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
