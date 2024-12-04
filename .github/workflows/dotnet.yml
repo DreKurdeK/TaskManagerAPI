@@ -11,21 +11,30 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
+
+    - name: Clear NuGet cache
+      run: dotnet nuget locals all --clear
+
     - name: Restore dependencies
-      run: dotnet restore --force
+      run: dotnet restore TaskManagerAPI.sln --force
+
     - name: Clean build directories
       run: dotnet clean
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
 
+    - name: Build
+      run: dotnet build TaskManagerAPI.sln --force --no-incremental
+
+    - name: Publish test project
+      run: dotnet publish TaskManagerAPI.Tests -c Debug -o ./publish
+
+    - name: Test with detailed logs
+      run: dotnet ./publish/TaskManagerAPI.Tests.dll
