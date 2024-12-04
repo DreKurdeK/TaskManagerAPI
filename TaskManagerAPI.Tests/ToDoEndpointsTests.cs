@@ -174,7 +174,7 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         {
             Title = string.Empty,
             Description = "Invalid Todo",
-            Expiry = DateTimeOffset.Now.AddDays(-1)
+            Expiry = DateTimeOffset.UtcNow.AddDays(-1)
         };
         
         // act 
@@ -195,7 +195,7 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         {
             Title = title,
             Description = description,
-            Expiry = DateTimeOffset.Now.AddDays(3)
+            Expiry = DateTimeOffset.UtcNow.AddDays(3)
         };
         
         // act 
@@ -242,7 +242,7 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         var titleForNextWeek = "NextWeekTest " + Guid.NewGuid();
 
         //  the current week is from Monday to Sunday
-        await CreateTodo(_client, titleForThisWeek, descValidTodos, 0); // This week (current week)
+        await CreateTodo(_client, titleForThisWeek, descValidTodos, 1); // This week (current week)
         await CreateTodo(_client, titleForNextWeek, descValidTodos, 7); // Next week
 
         // act
@@ -512,7 +512,7 @@ public class ToDoEndpointsTests(AppFactory factory) : IClassFixture<AppFactory>
         {
             Title = title,
             Description = description,
-            Expiry = DateTimeOffset.Now.AddDays(days)
+            Expiry = DateTimeOffset.UtcNow.AddDays(days)
         };
         var creatingResponse = await client.PostAsJsonAsync("/todos", toDo);
         creatingResponse.EnsureSuccessStatusCode();
