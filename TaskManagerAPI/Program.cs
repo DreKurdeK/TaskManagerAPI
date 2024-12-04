@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using TaskManagerAPI.Data;
+using TaskManagerAPI.DAL;
 using TaskManagerAPI.Endpoints;
 using TaskManagerAPI.Middleware;
 using TaskManagerAPI.Services;
