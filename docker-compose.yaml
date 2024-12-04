@@ -1,0 +1,35 @@
+version: '3.4'
+
+services:
+  postgres:
+    image: postgres
+    shm_size: '4gb'
+    container_name: task-manager.postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=todoapp
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  
+  taskmanagerapi:
+    image: task-manager.api:1.0.1
+    container_name: task-manager.api
+    restart: unless-stopped
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Username=postgres;Password=postgres;Database=todoapp
+    ports:
+      - 8080:8080
+      - 8081:8081
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: TaskManagerAPI/Dockerfile
+
+volumes:
+  postgres:
+    driver: local
