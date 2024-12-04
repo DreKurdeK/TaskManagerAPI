@@ -11,14 +11,14 @@ public static class ToDoEndpoints
         app.MapGet("/todos", async (ToDoService toDoService) =>
             await toDoService.GetAllToDosAsync());
 
-        app.MapGet("/todos/{id:guid}", async (Guid todoId, ToDoService toDoService) =>
+        app.MapGet("/todos/{todoId:guid}", async (Guid todoId, ToDoService toDoService) =>
         {
             if (todoId == Guid.Empty) return Results.BadRequest();
             var toDoItem = await toDoService.GetToDoByIdAsync(todoId);
             return toDoItem is not null ? Results.Ok(toDoItem) : Results.NotFound();
         });
 
-        app.MapGet("/todos/search/{title}", async (string searchTitle, ToDoService toDoService) =>
+        app.MapGet("/todos/search/{searchTitle}", async (string searchTitle, ToDoService toDoService) =>
         {
             var matchingToDos = await toDoService.GetToDosByTitleAsync(searchTitle);
             return matchingToDos.Count > 0 
@@ -26,9 +26,9 @@ public static class ToDoEndpoints
                 : Results.NotFound(new { message = "No ToDo items found with the specified title." });
         });
 
-        app.MapGet("/todos/upcoming/{days:int}", async (int daysAhead, ToDoService toDoService) =>
+        app.MapGet("/todos/upcoming/{daysAhead:int}", async (int daysAhead, ToDoService toDoService) =>
         {
-            if (daysAhead < 1) return Results.BadRequest();
+            if (daysAhead < -7) return Results.BadRequest();
             var endDate = DateTimeOffset.UtcNow.AddDays(daysAhead).Date;
             var upcomingToDos = await toDoService.GetToDosForDateRangeAsync(DateTimeOffset.UtcNow, endDate);
             return Results.Ok(upcomingToDos);
@@ -71,7 +71,7 @@ public static class ToDoEndpoints
             return Results.Created($"/todos/{newToDo.Id}", newToDo);
         });
 
-        app.MapPut("/todos/{id:guid}", async (Guid todoId, ToDo updatedToDo, ToDoService toDoService) =>
+        app.MapPut("/todos/{todoId:guid}", async (Guid todoId, ToDo updatedToDo, ToDoService toDoService) =>
         {
             var existingToDo = await toDoService.GetToDoByIdAsync(todoId);
             if (existingToDo == null)
@@ -83,7 +83,7 @@ public static class ToDoEndpoints
             return Results.NoContent();
         });
 
-        app.MapPatch("/todos/{id:guid}/done", async (Guid todoId, ToDoService toDoService) =>
+        app.MapPatch("/todos/{todoId:guid}/done", async (Guid todoId, ToDoService toDoService) =>
         {
             var existingToDo = await toDoService.GetToDoByIdAsync(todoId);
             if (existingToDo == null)
@@ -95,7 +95,7 @@ public static class ToDoEndpoints
             return Results.NoContent();
         });
 
-        app.MapDelete("/todos/{id:guid}", async (Guid todoId, ToDoService toDoService) =>
+        app.MapDelete("/todos/{todoId:guid}", async (Guid todoId, ToDoService toDoService) =>
         {
             var existingToDo = await toDoService.GetToDoByIdAsync(todoId);
             if (existingToDo == null)
