@@ -2,21 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TaskManagerAPI.Data;
+using TaskManagerAPI.DAL;
 
 #nullable disable
 
-namespace TaskManagerAPI.Data.Migrations
+namespace TaskManagerAPI.DAL.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20241203202910_InitialCreation")]
-    partial class InitialCreation
+    partial class ToDoDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
