@@ -4,7 +4,7 @@
 Task Manager API is a simple RESTful web application designed to manage ToDo tasks.
 The API provides endpoints for creating, retrieving, updating, and deleting tasks, as well as additional features such as searching and filtering tasks by specific criteria.
 
-The project is built using .NET 9 Minimal API, with PostgreSQL as the database, and uses FluentValidation for data validation. It also includes xUnit tests to ensure the application is working.
+The project is built using .NET 9 Minimal API, with PostgreSQL as the database, and uses FluentValidation for data validation and EntityFramework Core. It also includes xUnit tests to ensure the application is working.
 
 ---
 
@@ -55,7 +55,7 @@ The project is built using .NET 9 Minimal API, with PostgreSQL as the database, 
 ## Setup and Installation
 
 ### Prerequisites
-- .NET 8 SDK
+- .NET 9 SDK
 - PostgreSQL
 - Docker (optional)
 
